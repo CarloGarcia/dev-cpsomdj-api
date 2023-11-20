@@ -20,7 +20,7 @@ namespace Company.Function
             // _tableClient = tableClientFactory.CreateClient("dadjokes");
             // _tableClient = tableClientFactory.CreateClient(new TableClientOptions
             // {
-            //     ConnectionString = "DefaultEndpointsProtocol=https;AccountName=movdadjokes;AccountKey=7DcPaitu3NkYFt5JkOe1SJOIF7HKVhOk/+PVpmgubTnbPr4T+lrGa6psQWTWKGoQ1WKf5gL0TOIH+ASt81u72w==;EndpointSuffix=core.windows.net",
+            //     ConnectionString = "",
             //     TableName = "devdadjokes"
             //  });
         }
