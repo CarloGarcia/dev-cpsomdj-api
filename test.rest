@@ -1,0 +1,28 @@
+POST http://localhost:7071/api/AddDadJoke HTTP/1.1
+Content-Type: application/json
+
+{
+    "MyProperty": "Carlo"
+}
+
+###
+
+POST https://dev-cpsomdj-api.azurewebsites.net/api/AddDadJoke?code=krm6fcMTtao6UeUP_jPMXKAwhnJQUepy-NHLQL_kyjCZAzFuIx6jqA== HTTP/1.1
+Content-Type: application/json
+
+{
+    "MyProperty": "Carlo"
+}
+
+###
+
+{
+    "DateSubmitted": "20200101T010101",
+    "SubmittedBy": "Carlo",
+    "Votes": 0,
+    "Joke": "There are three types of people in this world. Those that can count and those that can't."
+}
+
+###
+GET http://localhost:7071/api/GetDadJokes HTTP/1.1
+
