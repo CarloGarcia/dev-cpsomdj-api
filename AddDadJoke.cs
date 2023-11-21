@@ -4,30 +4,23 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Azure.Data.Tables;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace Company.Function
 {
     public class AddDadJoke
     {
         private readonly ILogger _logger;
-        // private readonly TableClient _tableClient;
 
-        public AddDadJoke(ILogger<AddDadJoke> logger)//, IAzureClientFactory<TableClient> tableClientFactory)
+        public AddDadJoke(ILogger<AddDadJoke> logger)
         {
             _logger = logger;
-            // _tableClient = tableClientFactory.CreateClient("dadjokes").GetTableClient("devdadjokes");
-            // _tableClient.CreateIfNotExists();
-            // _tableClient = tableClientFactory.CreateClient("dadjokes");
-            // _tableClient = tableClientFactory.CreateClient(new TableClientOptions
-            // {
-            //     ConnectionString = "",
-            //     TableName = "devdadjokes"
-            //  });
         }
 
         [Function("AddDadJoke")]
         public TableEntity Run(
-            [HttpTrigger(AuthorizationLevel.Function, "post")] dynamic input,
+            [HttpTrigger(AuthorizationLevel.Function, "post")] [FromBody] DadJoke dadJoke,
             FunctionContext context)
         {
             _logger.LogInformation("AddDadJoke function triggered.");
@@ -36,27 +29,18 @@ namespace Company.Function
             var tableName = "devdadjokes";
             var tableClient = new TableClient(connectionString, tableName);
 
-            //var tableClient = _tableClientFactory.CreateClient(new TableClientOptions
-            //{
-            //    ConnectionString = connectionString,
-            //    TableName = tableName
-            //});
-
-            TableEntity entity = new TableEntity("myPartition", Guid.NewGuid().ToString())
+            var entity = new TableEntity("dadjokes", dadJoke.Id)
             {
-                { "Product", "Marker Set" },
-                { "Price", 5.00 },
-                { "Quantity", 21 }
+                { "Joke", dadJoke.Joke },
+                { "DateSubmitted", DateTime.UtcNow },
+                { "NoOfVotes", 0 },
+                { "SubmittedBy", dadJoke.SubmittedBy },
+                { "UserId", dadJoke.UserId },
+                { "Email", dadJoke.Email }
             };
+            
             tableClient.AddEntity(entity);
 
-            // var entity = new MyTableEntity
-            // {
-            //     PartitionKey = "myPartition",
-            //     RowKey = Guid.NewGuid().ToString(),
-            //     MyProperty = "myValue2"
-            // };
-            // tableClient.AddEntity(entity);
             return entity;
         }
     }

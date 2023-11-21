@@ -1,8 +1,14 @@
-POST http://localhost:7071/api/AddDadJoke HTTP/1.1
+POST http://localhost:7135/api/AddDadJoke HTTP/1.1
 Content-Type: application/json
 
 {
-    "MyProperty": "Carlo"
+    "Id":"3b220a41-f3a5-4b80-b54b-65cf53400514", 
+    "DateSubmitted":"2023-11-21T01:01:01",
+    "NoOfVotes":0,
+    "SubmittedBy":"Carlo Garcia",
+    "Joke":"test",
+    "UserId":"3b220a41-f3a5-4b80-b54b-65cf53400513",
+    "Email":"carlo.garciamier@gmail.com"
 }
 
 ###
@@ -24,5 +30,24 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:7071/api/GetDadJokes HTTP/1.1
+GET http://localhost:7135/api/GetDadJokes HTTP/1.1
 
+
+###
+
+PUT http://localhost:7135/api/VoteForDadJoke HTTP/1.1
+Content-Type: application/json
+
+{
+    "Id":"476c7e22-7ef2-4d5d-b5d7-09d493cff781", 
+    "DateSubmitted":"2023-11-21T01:01:01",
+    "SubmittedBy":"Carlo Garcia",
+    "UserId":"3b220a41-f3a5-4b80-b54b-65cf53400513",
+    "Email":""
+}
+
+###
+
+GET http://localhost:7135/api/GetDataJokes?code=Y8tzM_4SZBCU4SLYtOrsqOenuXLLo_SjhFoiWiVENrWMAzFuSWGMPw== HTTP/1.1
+
+###

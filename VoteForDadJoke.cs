@@ -1,4 +1,6 @@
 using System.Net;
+using System.Text.Json;
+using Azure.Data.Tables;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
@@ -15,27 +17,34 @@ namespace Company.Function
         }
 
         [Function("VoteForDadJoke")]
-        public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)
+        public DadJoke Run([HttpTrigger(AuthorizationLevel.Function, "put")] [FromBody] Vote vote)
         {
-            _logger.LogInformation("C# HTTP trigger function processed a request.");
+            _logger.LogInformation("AddDadJoke function triggered.");
 
-            var response = req.CreateResponse(HttpStatusCode.OK);
-            response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
+            var connectionString = Environment.GetEnvironmentVariable("MyStorageConnection");
+            var tableName = "devdadjokes";
+            var tableClient = new TableClient(connectionString, tableName);
 
-            response.WriteString("Welcome to Azure Functions!");
+            TableEntity entity = tableClient.GetEntity<TableEntity>("dadjokes", vote.Id);
 
-            // // Get the entity to update.
-            // TableEntity qEntity = await tableClient.GetEntityAsync<TableEntity>(partitionKey, rowKey);
-            // qEntity["Price"] = 7.00;
+            int currentValue  = (int)entity["NoOfVotes"];
+            entity["NoOfVotes"] = currentValue + 1;
+            tableClient.UpdateEntityAsync(entity, entity.ETag);
 
-            // // Since no UpdateMode was passed, the request will default to Merge.
-            // await tableClient.UpdateEntityAsync(qEntity, qEntity.ETag);
+            TableEntity updatedEntity = tableClient.GetEntity<TableEntity>("dadjokes", vote.Id);
 
-            // TableEntity updatedEntity = await tableClient.GetEntityAsync<TableEntity>(partitionKey, rowKey);
-            // Console.WriteLine($"'Price' before updating: ${entity.GetDouble("Price")}");
-            // Console.WriteLine($"'Price' after updating: ${updatedEntity.GetDouble("Price")}");
+            var updatedDadJoke = new DadJoke
+            {
+                Id = updatedEntity.RowKey,
+                Joke = updatedEntity.GetString("Joke"),
+                DateSubmitted = (DateTime)(updatedEntity.GetDateTime("DateSubmitted")),
+                NoOfVotes = (int)updatedEntity["NoOfVotes"],
+                SubmittedBy = updatedEntity.GetString("SubmittedBy"),
+                UserId = updatedEntity.GetString("UserId"),
+                Email = updatedEntity.GetString("Email")
+            };
 
-            return response;
+            return updatedDadJoke;
         }
     }
 }
