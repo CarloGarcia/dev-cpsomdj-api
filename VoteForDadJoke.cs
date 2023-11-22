@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using Azure.Data.Tables;
+using Company.Function.Models;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
@@ -13,25 +14,25 @@ namespace Company.Function
 
         public VoteForDadJoke(ILoggerFactory loggerFactory)
         {
-            _logger = loggerFactory.CreateLogger<VoteForDadJoke>();
+            _logger = loggerFactory.CreateLogger<VoteForDadJoke>(); 
         }
 
         [Function("VoteForDadJoke")]
-        public DadJoke Run([HttpTrigger(AuthorizationLevel.Function, "put")] [FromBody] Vote vote)
+        public DadJoke Run([HttpTrigger(AuthorizationLevel.Function, "post")] [FromBody] Vote vote)
         {
             _logger.LogInformation("AddDadJoke function triggered.");
 
-            var connectionString = Environment.GetEnvironmentVariable("MyStorageConnection");
-            var tableName = "devdadjokes";
-            var tableClient = new TableClient(connectionString, tableName);
-
-            TableEntity entity = tableClient.GetEntity<TableEntity>("dadjokes", vote.Id);
+            var connectionString = Environment.GetEnvironmentVariable("TableStorageConnectionString");
+            var jokesTableName = Environment.GetEnvironmentVariable("DadJokesTableName");
+            var jokesTableClient = new TableClient(connectionString, jokesTableName);
+          
+            TableEntity entity = jokesTableClient.GetEntity<TableEntity>("dadjokes", vote.JokeId);
 
             int currentValue  = (int)entity["NoOfVotes"];
             entity["NoOfVotes"] = currentValue + 1;
-            tableClient.UpdateEntityAsync(entity, entity.ETag);
+            jokesTableClient.UpdateEntityAsync(entity, entity.ETag);
 
-            TableEntity updatedEntity = tableClient.GetEntity<TableEntity>("dadjokes", vote.Id);
+            TableEntity updatedEntity = jokesTableClient.GetEntity<TableEntity>("dadjokes", vote.JokeId);
 
             var updatedDadJoke = new DadJoke
             {
@@ -43,6 +44,19 @@ namespace Company.Function
                 UserId = updatedEntity.GetString("UserId"),
                 Email = updatedEntity.GetString("Email")
             };
+
+            var voteEntity = new TableEntity("dadjokes", vote.Id)
+            {
+                { "JokeId", vote.JokeId },
+                { "DateSubmitted", DateTime.UtcNow },
+                { "SubmittedBy", vote.SubmittedBy },
+                { "UserId", vote.UserId },
+                { "Email", vote.Email }
+            };
+            
+            var votesTableName = Environment.GetEnvironmentVariable("VotesTableName");
+            var votesTableClient = new TableClient(connectionString, votesTableName);  
+            votesTableClient.AddEntity(voteEntity);
 
             return updatedDadJoke;
         }

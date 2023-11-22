@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Azure.Data.Tables;
 using System.Text.Json;
 using Azure;
+using Company.Function.Models;
 
 namespace Company.Function
 {
@@ -22,8 +23,8 @@ namespace Company.Function
         {
             _logger.LogInformation("GetDadJokes funcion triggered.");
 
-            var connectionString = Environment.GetEnvironmentVariable("MyStorageConnection");
-            var tableName = "devdadjokes";
+            var connectionString = Environment.GetEnvironmentVariable("TableStorageConnectionString");
+            var tableName = Environment.GetEnvironmentVariable("DadJokesTableName");
             var tableClient = new TableClient(connectionString, tableName);
 
             Pageable<TableEntity> entities = tableClient.Query<TableEntity>();
@@ -51,12 +52,3 @@ namespace Company.Function
         }
     }
 }
-
-// Pageable<TableEntity> entities = tableClient.Query<TableEntity>(filter: "PartitionKey eq 'markers'");
-// // Or using a filter expression
-// Pageable<TableEntity> entities = tableClient.Query<TableEntity>(ent => ent.PartitionKey == "markers");
-
-// foreach (TableEntity entity in entities)
-// {
-//     Console.WriteLine($"{entity.GetString("Product")}: {entity.GetDouble("Price")}");
-// }

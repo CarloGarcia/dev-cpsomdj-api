@@ -1,11 +1,8 @@
-using System.Net;
-using Microsoft.Extensions.Azure;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Azure.Data.Tables;
-using System.Text.Json.Serialization;
-using System.Text.Json;
+using Company.Function.Models;
 
 namespace Company.Function
 {
@@ -25,8 +22,8 @@ namespace Company.Function
         {
             _logger.LogInformation("AddDadJoke function triggered.");
 
-            var connectionString = Environment.GetEnvironmentVariable("MyStorageConnection");
-            var tableName = "devdadjokes";
+            var connectionString = Environment.GetEnvironmentVariable("TableStorageConnectionString");
+            var tableName = Environment.GetEnvironmentVariable("DadJokesTableName");
             var tableClient = new TableClient(connectionString, tableName);
 
             var entity = new TableEntity("dadjokes", dadJoke.Id)
